@@ -10,7 +10,8 @@
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
             "intelliSenseMode": "linux-gcc-x64",
-            "compileCommands": "${workspaceFolder}/ns-allinone-3.33/ns-3.33/build/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/ns-allinone-3.33/ns-3.33/build/compile_commands.json",
+            "configurationProvider": "ms-vscode.makefile-tools"
         }
     ],
     "version": 4

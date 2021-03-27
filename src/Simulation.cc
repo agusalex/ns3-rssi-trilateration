@@ -22,7 +22,7 @@
 #include "ns3/wifi-module.h"
 #include "ns3/internet-module.h"
 #include "ns3/netanim-module.h"
-
+#include "ns3/hybrid-buildings-propagation-loss-model.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
   double interval = 0.1; // seconds
                 Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
   myfile.open ("capture.csv", std::ofstream::out | std::ofstream::trunc);
+  myfile << "distance,rssi\n";
   CommandLine cmd;
   cmd.Parse(argc, argv);
 
@@ -143,11 +144,22 @@ int main(int argc, char *argv[])
   // Create PHY and Channel
   YansWifiPhyHelper wifiPhy;
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
+  
   wifiPhy.SetChannel(wifiChannel.Create());
 
   NS_LOG_UNCOND("%INFO: Configuring PHY Loss model...");
-  //Config::SetDefault("ns3::RangePropagationLossModel::MaxRange", DoubleValue(10));
-  wifiChannel.AddPropagationLoss("ns3::LogDistancePropagationLossModel");
+  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
+  // Ptr<HybridBuildingsPropagationLossModel> propagationLossModel = CreateObject<HybridBuildingsPropagationLossModel> ();
+  //EnvironmentType env = UrbanEnvironment;
+ // CitySize city = LargeCity;
+  //propagationLossModel->SetAttribute ("Frequency", DoubleValue (m_freq));
+  //propagationLossModel->SetAttribute ("Environment", EnumValue (env));
+  //propagationLossModel->SetAttribute ("CitySize", EnumValue (city));
+  // cancel shadowing effect
+  //propagationLossModel->SetAttribute ("ShadowSigmaOutdoor", DoubleValue (0.0));
+  //propagationLossModel->SetAttribute ("ShadowSigmaIndoor", DoubleValue (0.0));
+  //propagationLossModel->SetAttribute ("ShadowSigmaExtWalls", DoubleValue (0.0));
   //wifiChannel.SetPropagationDelay("ns3::LogDistancePropagationLossModel"); 
 
   // Connect PHY with the Channel
@@ -196,9 +208,8 @@ int main(int argc, char *argv[])
   Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(1), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
 
   // enable packet capture tracing and xml
-  wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
-  AnimationInterface anim("WifiSimpleAdhoc.xml");
-
+   // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
+ //  AnimationInterface anim("WifiSimpleAdhoc.xml");
   //Config::Connect ("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/Phy/MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
 
   Simulator::Run();
