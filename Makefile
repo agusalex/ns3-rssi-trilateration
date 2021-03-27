@@ -1,7 +1,7 @@
 VERSION=3.33
 
 install:
-	#./dependencies.sh
+	sudo -S sh dependencies.sh
 	if [ -d "./ns-allinone-$(VERSION)" ]; then \
 		echo "Dir exists, skip downloading .."; \
 	else \

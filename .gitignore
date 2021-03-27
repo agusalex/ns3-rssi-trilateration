@@ -31,3 +31,5 @@
 *.out
 *.app
 ns-allinone-3.33/
+
+.idea/
