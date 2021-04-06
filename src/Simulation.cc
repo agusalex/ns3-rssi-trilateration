@@ -36,7 +36,7 @@ NS_LOG_COMPONENT_DEFINE("WifiSimpleAdhoc");
 using namespace ns3;
 double distance = 5; // m
 static const uint32_t numNodes = 6;
-static std::ofstream myfile;
+static std::ofstream outFiles[numNodes];
 static NodeContainer c;
 
 void SetPosition(Ptr<Node> node, Vector position)
@@ -73,9 +73,11 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
   NS_LOG_UNCOND("*******************************************************************************************************************");
   NS_LOG_UNCOND("%INFO: I am Node " << context.substr(10, 1) << " And I Recieved " << signalNoise.signal << " dbm");
   NS_LOG_UNCOND("*******************************************************************************************************************");
-  if(context.substr(10, 1)=="1"){
-  myfile << GetPosition(c.Get(0))<<","<<signalNoise.signal << "\n";
-  }
+  uint32_t index = std::stoi(context.substr(10, 1) );
+
+  outFiles[0] << context.substr(10, 1) <<","<< GetPosition(c.Get(0))<<","<<signalNoise.signal << "\n";
+
+  outFiles[index] << GetPosition(c.Get(0)) << "," << signalNoise.signal << "\n";
 }
 
 bool ReceivePacket(Ptr<NetDevice> netdevice, Ptr<const Packet> packet, uint16_t protocol, const Address &sourceAddress)
@@ -120,8 +122,13 @@ int main(int argc, char *argv[])
   //uint32_t numPackets = 1;
   double interval = 0.1; // seconds
                 Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
-  myfile.open ("capture.csv", std::ofstream::out | std::ofstream::trunc);
-  myfile << "distance,rssi\n";
+  outFiles[0].open ("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
+  outFiles[0] << "device,distance,rssi\n";
+  for (uint32_t i=1;i<numNodes ;i++)
+    {
+  outFiles[i].open ("capture_"+std::to_string(i)+".csv", std::ofstream::out | std::ofstream::trunc);
+  outFiles[i] << "distance,rssi\n";
+    }
   CommandLine cmd;
   cmd.Parse(argc, argv);
 
@@ -205,7 +212,7 @@ int main(int argc, char *argv[])
 
   NS_LOG_UNCOND("%INFO: Generate traffic.");
 
-  Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(1), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
+  Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(0), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
 
   // enable packet capture tracing and xml
    // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);

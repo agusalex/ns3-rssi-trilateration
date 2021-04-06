@@ -27,4 +27,4 @@ vis:
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run Simulation --vis
 graph:
 	make run
-	env/bin/python rssi-filter-profiling-ESP8266/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture.csv \
+	env/bin/python rssi-filter-profiling-ESP8266/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_1.csv \
