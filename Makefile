@@ -19,11 +19,13 @@ install:
 	fi
 	#cd ns-allinone-$(VERSION) && ./build.py --enable-examples --enable-tests
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf configure
-run:
+copy: 
 	yes | cp -rf src/* ns-allinone-$(VERSION)/ns-$(VERSION)/scratch/
+run:
+	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run Simulation
 vis:
-	yes | cp -rf src/* ns-allinone-$(VERSION)/ns-$(VERSION)/scratch/
+	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run Simulation --vis
 graph:
 	make run
