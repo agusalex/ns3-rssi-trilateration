@@ -27,7 +27,7 @@ run:
 vis:
 	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering --vis
-graph:
+graph-1d:
 	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 1DDistanceProfiling
 	env/bin/python rssi-filter-profiling-ESP8266/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_1.csv \

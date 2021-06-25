@@ -6,7 +6,7 @@
 
 ### Just run: 
 
-``  make install && make graph 
+``  make install && make graph-1d
 ``
 
 
