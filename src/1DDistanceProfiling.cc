@@ -69,14 +69,14 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
 {
   WifiMacHeader hdr;
   packet->PeekHeader(hdr);
-
-  NS_LOG_UNCOND("*******************************************************************************************************************");
-  NS_LOG_UNCOND("%INFO: I am Node " << context.substr(10, 1) << " And I Recieved " << signalNoise.signal << " dbm");
-  NS_LOG_UNCOND("*******************************************************************************************************************");
   uint32_t index = std::stoi(context.substr(10, 1) );
+  NS_LOG_UNCOND("*******************************************************************************************************************");
+  NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is:" << GetPosition(c.Get(index))<<" And I Recieved " << signalNoise.signal << " dbm");
+  NS_LOG_UNCOND("*******************************************************************************************************************");
 
-  outFiles[0] << context.substr(10, 1) <<","<< GetPosition(c.Get(0))<<","<<signalNoise.signal << "\n";
 
+  outFiles[0] << context.substr(10, 1) <<","<< GetPosition(c.Get(index))<<","<<signalNoise.signal << "\n";
+  
   outFiles[index] << GetPosition(c.Get(0)) << "," << signalNoise.signal << "\n";
 }
 
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
   uint32_t packets = 500;     // number
   //uint32_t numPackets = 1;
   double interval = 0.1; // seconds
-                Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
+  Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
   outFiles[0].open ("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
   outFiles[0] << "device,distance,rssi\n";
   for (uint32_t i=1;i<numNodes ;i++)

@@ -23,10 +23,11 @@ copy:
 	yes | cp -rf src/* ns-allinone-$(VERSION)/ns-$(VERSION)/scratch/
 run:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run Simulation
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering
 vis:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run Simulation --vis
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering --vis
 graph:
-	make run
+	make copy
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 1DDistanceProfiling
 	env/bin/python rssi-filter-profiling-ESP8266/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_1.csv \
