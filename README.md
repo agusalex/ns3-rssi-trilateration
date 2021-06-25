@@ -4,6 +4,12 @@
 
 ## 1D Simulation Signal Decay Profiling (src/1DDistanceProfiling.cc)
 
+Just run: 
+
+``  make install && make graph 
+``
+
+
 ![](media/Figure_1.png)
 ![](media/Figure_2.png)
 ![](media/Figure_3.png)
