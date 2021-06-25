@@ -23,7 +23,7 @@ copy:
 	yes | cp -rf src/* ns-allinone-$(VERSION)/ns-$(VERSION)/scratch/
 run:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf -v --run 2ParticleFiltering
 vis:
 	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering --vis

@@ -32,11 +32,10 @@
 // DEfine logging component
 NS_LOG_COMPONENT_DEFINE("WifiSimpleAdhoc");
 
-
 using namespace ns3;
 double distance = 5; // m
-static const uint32_t numNodes = 6;
-static std::ofstream outFiles[numNodes];
+static const uint32_t numNodes = 11;
+static std::ofstream outFiles[numNodes + 1];
 static NodeContainer c;
 
 void SetPosition(Ptr<Node> node, Vector position)
@@ -50,7 +49,9 @@ Vector GetPosition(Ptr<Node> node)
   Ptr<MobilityModel> mobility = node->GetObject<MobilityModel>();
   return mobility->GetPosition();
 }
-
+static double rssiToDistance(double x){
+  return pow(10,(-1*(x + 17) /38));
+}
 static void GenerateTraffic(Ptr<WifiNetDevice> wifinetdevice, uint32_t pktSize, uint32_t pktCount, Time pktInterval)
 {
   if (pktCount > 0)
@@ -69,15 +70,17 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
 {
   WifiMacHeader hdr;
   packet->PeekHeader(hdr);
-  uint32_t index = std::stoi(context.substr(10, 1) );
+  uint32_t index = std::stoi(context.substr(10, 1));
+  Vector pos = GetPosition(c.Get(index));
+  Vector Tpos = GetPosition(c.Get(0)); // Target Position
   NS_LOG_UNCOND("*******************************************************************************************************************");
-  NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is:" << GetPosition(c.Get(index))<<" And I Recieved " << signalNoise.signal << " dbm");
+  NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is:" << pos << " And I Recieved " << signalNoise.signal << " dbm");
   NS_LOG_UNCOND("*******************************************************************************************************************");
 
 
-  outFiles[0] << context.substr(10, 1) <<","<< GetPosition(c.Get(index))<<","<<signalNoise.signal << "\n";
-  
-  outFiles[index] << GetPosition(c.Get(0)) << "," << signalNoise.signal << "\n";
+  outFiles[0] << context.substr(10, 1) << "," << Tpos.x << "," << Tpos.y << "," << signalNoise.signal <<","<< rssiToDistance(signalNoise.signal) << ", " <<CalculateDistance(pos,Tpos)<<"\n";
+
+  outFiles[index] << Tpos.x << "," << Tpos.y << "," << signalNoise.signal << "\n";
 }
 
 bool ReceivePacket(Ptr<NetDevice> netdevice, Ptr<const Packet> packet, uint16_t protocol, const Address &sourceAddress)
@@ -100,40 +103,63 @@ bool ReceivePacket(Ptr<NetDevice> netdevice, Ptr<const Packet> packet, uint16_t 
 void installMobility(NodeContainer &c)
 {
   MobilityHelper mobility;
-  mobility.SetPositionAllocator("ns3::GridPositionAllocator",
-                                "MinX", DoubleValue(0),
+  /*mobility.SetPositionAllocator("ns3::GridPositionAllocator",
+                                "MinX", DoubleValue(100),
                                 "MinY", DoubleValue(100),
                                 "DeltaX", DoubleValue(distance),
                                 "DeltaY", DoubleValue(distance),
                                 "GridWidth", UintegerValue(6),
-                                "LayoutType", StringValue("RowFirst"));
+                                "LayoutType", StringValue("RowFirst"));*/
+  // 75 max range
+
+  /*for (uint32_t i = 0; i < numNodes; ++i)
+  {
+    base.x ;
+  //  SetPosition(c.Get(i),base);
+    //SetPosition(c.Get((numNodes/2)+i),Vector3D(5*i, 10, 0.0));
+  }*/
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(c);
-  std::string traceFile = "scratch/move.ns_movements";
-  Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
+  Ns2MobilityHelper ns2 = Ns2MobilityHelper("scratch/2d.ns_movements");
   ns2.Install();
+  return;
+}
+void logPositions(NodeContainer &c)
+{
+
+  //Vector base = Vector3D(100, 100, 0.0);
+
+  outFiles[numNodes].open("positions.csv", std::ofstream::out | std::ofstream::trunc);
+  outFiles[numNodes] << "node, x, y\n";
+  for (uint32_t i = 0; i < numNodes; ++i)
+  {
+    Vector pos = GetPosition(c.Get(i)); //Vector3D(5*i+base.x, base.x, 0.0);
+    //SetPosition(c.Get(i),pos);
+    outFiles[numNodes] << i << ", " << pos.x << ", " << pos.y << "\n";
+  }
   return;
 }
 
 int main(int argc, char *argv[])
 {
   uint32_t packetSize = 1000; // bytes
-  uint32_t packets = 500;     // number
+  uint32_t packets = 820;     // number
   //uint32_t numPackets = 1;
-  double interval = 0.1; // seconds
-  Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
-  outFiles[0].open ("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
-  outFiles[0] << "device,distance,rssi\n";
-  for (uint32_t i=1;i<numNodes ;i++)
-    {
-  outFiles[i].open ("capture_"+std::to_string(i)+".csv", std::ofstream::out | std::ofstream::trunc);
-  outFiles[i] << "distance,rssi\n";
-    }
+  double interval = 0.1;                        // seconds
+  Time interPacketInterval = Seconds(interval); // double rss = -80;  // -dBm
+  outFiles[0].open("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
+
+  outFiles[0] << "device,x,y,rssi,distance_predicted,distance\n";
+
+  for (uint32_t i = 1; i < numNodes; i++)
+  {
+    outFiles[i].open("capture_" + std::to_string(i) + ".csv", std::ofstream::out | std::ofstream::trunc);
+    outFiles[i] << "x,y,rssi\n";
+  }
   CommandLine cmd;
   cmd.Parse(argc, argv);
 
   // Convert to time object
-
 
   // Enable verbosity for debug which includes
   // NS_LOG_DEBUG_, NS_LOG_WARN and LOG_ERROR
@@ -151,15 +177,15 @@ int main(int argc, char *argv[])
   // Create PHY and Channel
   YansWifiPhyHelper wifiPhy;
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default();
-  
+
   wifiPhy.SetChannel(wifiChannel.Create());
 
   NS_LOG_UNCOND("%INFO: Configuring PHY Loss model...");
-  wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
+  wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss("ns3::FriisPropagationLossModel");
   // Ptr<HybridBuildingsPropagationLossModel> propagationLossModel = CreateObject<HybridBuildingsPropagationLossModel> ();
   //EnvironmentType env = UrbanEnvironment;
- // CitySize city = LargeCity;
+  // CitySize city = LargeCity;
   //propagationLossModel->SetAttribute ("Frequency", DoubleValue (m_freq));
   //propagationLossModel->SetAttribute ("Environment", EnumValue (env));
   //propagationLossModel->SetAttribute ("CitySize", EnumValue (city));
@@ -167,7 +193,7 @@ int main(int argc, char *argv[])
   //propagationLossModel->SetAttribute ("ShadowSigmaOutdoor", DoubleValue (0.0));
   //propagationLossModel->SetAttribute ("ShadowSigmaIndoor", DoubleValue (0.0));
   //propagationLossModel->SetAttribute ("ShadowSigmaExtWalls", DoubleValue (0.0));
-  //wifiChannel.SetPropagationDelay("ns3::LogDistancePropagationLossModel"); 
+  //wifiChannel.SetPropagationDelay("ns3::LogDistancePropagationLossModel");
 
   // Connect PHY with the Channel
   NS_LOG_UNCOND("%INFO: Connecting PHY with Channel...");
@@ -198,6 +224,11 @@ int main(int argc, char *argv[])
   NS_LOG_UNCOND("%INFO: Assign Mac48Address Addresses.");
   //devices->SetAddress(Mac48Address::Allocate ());
   uint32_t nDevices = devices.GetN();
+
+  NS_LOG_UNCOND("%INFO: Logging Node Locations.");
+
+  logPositions(c);
+
   for (uint32_t i = 0; i < nDevices; ++i)
   {
     Ptr<WifiNetDevice> p = DynamicCast<WifiNetDevice>(devices.Get(i));
@@ -215,8 +246,8 @@ int main(int argc, char *argv[])
   Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(0), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
 
   // enable packet capture tracing and xml
-   // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
- //  AnimationInterface anim("WifiSimpleAdhoc.xml");
+  // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
+  //  AnimationInterface anim("WifiSimpleAdhoc.xml");
   //Config::Connect ("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/Phy/MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
 
   Simulator::Run();

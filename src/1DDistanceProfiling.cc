@@ -71,7 +71,7 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
   packet->PeekHeader(hdr);
   uint32_t index = std::stoi(context.substr(10, 1) );
   NS_LOG_UNCOND("*******************************************************************************************************************");
-  NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is:" << GetPosition(c.Get(index))<<" And I Recieved " << signalNoise.signal << " dbm");
+  NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is: " << GetPosition(c.Get(index)) <<" And I Recieved " << signalNoise.signal << " dbm");
   NS_LOG_UNCOND("*******************************************************************************************************************");
 
 
@@ -109,7 +109,7 @@ void installMobility(NodeContainer &c)
                                 "LayoutType", StringValue("RowFirst"));
   mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
   mobility.Install(c);
-  std::string traceFile = "scratch/move.ns_movements";
+  std::string traceFile = "scratch/1d.ns_movements";
   Ns2MobilityHelper ns2 = Ns2MobilityHelper(traceFile);
   ns2.Install();
   return;

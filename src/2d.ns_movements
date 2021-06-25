@@ -1,0 +1,27 @@
+$node_(0) set X_ 25
+$node_(0) set Y_ 25
+$node_(1) set X_ 0
+$node_(1) set Y_ 0
+$node_(2) set X_ 16.5
+$node_(2) set Y_ 0
+$node_(3) set X_ 33
+$node_(3) set Y_ 0
+$node_(4) set X_ 50
+$node_(4) set Y_ 0
+$node_(5) set X_ 0
+$node_(5) set Y_ 50
+$node_(6) set X_ 16.5
+$node_(6) set Y_ 50
+$node_(7) set X_ 33
+$node_(7) set Y_ 50
+$node_(8) set X_ 50
+$node_(8) set Y_ 50
+$node_(9) set X_ 0
+$node_(9) set Y_ 25
+$node_(10) set X_ 50
+$node_(10) set Y_ 25
+$ns_ at 0 "$node_(0) setdest 5 5 2.5"
+$ns_ at 12 "$node_(0) setdest 45 5 2.5"
+$ns_ at 30 "$node_(0) setdest 45 45 2.5"
+$ns_ at 50 "$node_(0) setdest 5 45 2.5"
+$ns_ at 70 "$node_(0) setdest 5 5 2.5"
