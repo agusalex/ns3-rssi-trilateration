@@ -10,9 +10,9 @@ install:
 	if [ -d "./ns-allinone-$(VERSION)" ]; then \
 		echo "Dir exists, skip downloading .."; \
 	else \
-		git clone https://github.com/agusalex/rssi-filter-profiling-ESP8266 \
+		git clone https://github.com/agusalex/rssi-filter-profiling \
 		virtualenv env --python=python3 \
-		env/bin/pip install -r rssi-filter-profiling-ESP8266/requirements.txt; \
+		env/bin/pip install -r rssi-filter-profiling/requirements.txt; \
 		wget http://www.nsnam.org/release/ns-allinone-$(VERSION).tar.bz2; \
 		tar -xf ./ns-allinone-$(VERSION).tar.bz2; \
 		rm ./ns-allinone-$(VERSION).tar.bz2; \
