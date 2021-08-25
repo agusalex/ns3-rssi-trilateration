@@ -34,7 +34,7 @@ NS_LOG_COMPONENT_DEFINE("WifiSimpleAdhoc");
 
 using namespace ns3;
 double distance = 5; // m
-static const uint32_t numNodes = 11;
+static const uint32_t numNodes = 9;
 static std::ofstream outFiles[numNodes + 1];
 static NodeContainer c;
 
@@ -49,9 +49,9 @@ Vector GetPosition(Ptr<Node> node)
   Ptr<MobilityModel> mobility = node->GetObject<MobilityModel>();
   return mobility->GetPosition();
 }
-static double rssiToDistance(double x){
-  return pow(10,(-1*(x + 17) /38));
-}
+//static double rssiToDistance(double x){
+ // return pow(10,(-1*(x + 17) /38));
+//}
 static void GenerateTraffic(Ptr<WifiNetDevice> wifinetdevice, uint32_t pktSize, uint32_t pktCount, Time pktInterval)
 {
   if (pktCount > 0)
@@ -60,9 +60,6 @@ static void GenerateTraffic(Ptr<WifiNetDevice> wifinetdevice, uint32_t pktSize, 
     static Mac48Address broadcast = Mac48Address("ff:ff:ff:ff:ff:ff");
     wifinetdevice->Send(Create<Packet>(pktSize), broadcast, wifinetdevice->GetNode()->GetId());
     Simulator::Schedule(pktInterval, &GenerateTraffic, wifinetdevice, pktSize, pktCount - 1, pktInterval);
-  }
-  else
-  {
   }
 }
 
@@ -76,9 +73,8 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
   NS_LOG_UNCOND("*******************************************************************************************************************");
   NS_LOG_UNCOND("%INFO: I am Node " << index << " My Position is:" << pos << " And I Recieved " << signalNoise.signal << " dbm");
   NS_LOG_UNCOND("*******************************************************************************************************************");
-
-
-  outFiles[0] << context.substr(10, 1) << "," << Tpos.x << "," << Tpos.y << "," << signalNoise.signal <<","<< rssiToDistance(signalNoise.signal) << ", " <<CalculateDistance(pos,Tpos)<<"\n";
+  
+  outFiles[0] << Simulator::Now().GetMilliSeconds() << "," << context.substr(10, 1) <<"," << pos.x << "," << pos.y << "," << signalNoise.signal <<"," << CalculateDistance(pos,Tpos) << "," << Tpos.x << "," << Tpos.y <<"\n";
 
   outFiles[index] << Tpos.x << "," << Tpos.y << "," << signalNoise.signal << "\n";
 }
@@ -149,7 +145,7 @@ int main(int argc, char *argv[])
   Time interPacketInterval = Seconds(interval); // double rss = -80;  // -dBm
   outFiles[0].open("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
 
-  outFiles[0] << "device,x,y,rssi,distance_predicted,distance\n";
+  outFiles[0] << "millis,node,x,y,rssi,distance,target_x,target_y\n";
 
   for (uint32_t i = 1; i < numNodes; i++)
   {
