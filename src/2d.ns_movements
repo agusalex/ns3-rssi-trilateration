@@ -6,7 +6,7 @@ $node_(2) set X_ 25
 $node_(2) set Y_ 0
 $node_(3) set X_ 50
 $node_(3) set Y_ 0
-$node_(4) set X_ 50
+$node_(4) set X_ 25
 $node_(4) set Y_ 25
 $node_(5) set X_ 0
 $node_(5) set Y_ 25

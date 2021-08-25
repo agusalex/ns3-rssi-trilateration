@@ -11,8 +11,10 @@ install:
 		echo "Dir exists, skip downloading .."; \
 	else \
 		git clone https://github.com/agusalex/rssi-filter-profiling \
+		git clone https://github.com/agusalex/easy-trilateration \
 		virtualenv env --python=python3 \
 		env/bin/pip install -r rssi-filter-profiling/requirements.txt; \
+		env/bin/pip install -r easy-trilateration/requirements.txt; \
 		wget http://www.nsnam.org/release/ns-allinone-$(VERSION).tar.bz2; \
 		tar -xf ./ns-allinone-$(VERSION).tar.bz2; \
 		rm ./ns-allinone-$(VERSION).tar.bz2; \
@@ -31,3 +33,8 @@ graph-1d:
 	make copy
 	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 1DDistanceProfiling
 	env/bin/python rssi-filter-profiling/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_1.csv \
+
+graph-2d:
+	make copy
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering
+	env/bin/python easy-trilateration/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_combined.csv \
