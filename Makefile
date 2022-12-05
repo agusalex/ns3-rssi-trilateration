@@ -1,4 +1,4 @@
-VERSION=3.33
+VERSION=3.37
 # Dependencies work for Ubuntu 20.04
 install:
 #	sudo -S sudo apt-get update && sudo apt-get install -y \
@@ -20,21 +20,26 @@ install:
 		rm ./ns-allinone-$(VERSION).tar.bz2; \
 	fi
 	#cd ns-allinone-$(VERSION) && ./build.py --enable-examples --enable-tests
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf configure
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./ns3 configure
 copy: 
 	yes | cp -rf src/* ns-allinone-$(VERSION)/ns-$(VERSION)/scratch/
 run:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf -v --run 2ParticleFiltering
-vis:
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && CXXFLAGS="-Wall -g -O0" ./ns3 -v run scratch/2ParticleFiltering
+vis-2d:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering --vis
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./ns3 run scratch/2ParticleFiltering --vis
+
+vis-1d:
+	make copy
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./ns3 run scratch/1DDistanceProfiling --vis
+
 graph-1d:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 1DDistanceProfiling
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./ns3 run scratch/1DDistanceProfiling
 	env/bin/python rssi-filter-profiling/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_1.csv \
 
 graph-2d:
 	make copy
-	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./waf --run 2ParticleFiltering
+	cd ns-allinone-$(VERSION)/ns-$(VERSION)/ && ./ns3 run scratch/2ParticleFiltering.cc
 	env/bin/python easy-trilateration/main.py --file ns-allinone-$(VERSION)/ns-$(VERSION)/capture_combined.csv \

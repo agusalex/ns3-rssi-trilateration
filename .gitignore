@@ -37,4 +37,6 @@ ns-allinone-3.33/
 .vscode/
 
 env/
-rssi-filter-profiling-ESP8266/
+rssi-filter-profiling/
+easy-trilateration/
+.DS_Store
