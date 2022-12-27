@@ -35,7 +35,7 @@ NS_LOG_COMPONENT_DEFINE("WifiSimpleAdhoc");
 
 using namespace ns3;
 double distance = 5; // m
-static const uint32_t numNodes = 6;
+static const uint32_t numNodes = 2;
 static std::ofstream outFiles[numNodes];
 static NodeContainer c;
 
@@ -82,19 +82,6 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
 
 bool ReceivePacket(Ptr<NetDevice> netdevice, Ptr<const Packet> packet, uint16_t protocol, const Address &sourceAddress)
 {
-  // Ptr<WifiNetDevice> wifinetdevice = DynamicCast<WifiNetDevice> (netdevice);
-  // uint32_t pktSize = 1000;
-  //NS_LOG_UNCOND ("%INFO: Received one packet! I am node "<<wifinetdevice->GetNode ()->GetId ()<<" my MAC is: "<<wifinetdevice->GetAddress());
-  // NS_LOG_UNCOND ("%INFO: Received a packet from MAC:" << sourceAddress);
-  //Ptr<NetDevice> devicesource = sourceAddress->GetObject<NetDevice>();
-  //Ptr<Mac48Address> sourceMacAddress = GetObject<sourceAddress>;
-  //Ptr<m_address> mAddressfromMacSrc = sourceMacAddress->GetObject<m_address>();
-  //NS_LOG_UNCOND ("%INFO: received a packet from Node ID:" <<mAddressfromMacSrc->GetObject<Node>()->GetId());
-  // *** PROTOCOL NUMBER IS MAPPED TO A SPECIFIC L3 PAYLOAD FORMAT SEE LINK BELOW
-  //http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-  //NS_LOG_UNCOND ("%INFO: sending packet response due to callback with protocol: " << protocol);
-  //double r =1.0+ ((double) rand() / (RAND_MAX));
-  //Simulator::Schedule (Seconds (r), &GenerateTraffic, wifinetdevice, pktSize,1, Seconds(r));
   return true;
 }
 void installMobility(NodeContainer &c)
@@ -119,7 +106,6 @@ int main(int argc, char *argv[])
 {
   uint32_t packetSize = 1000; // bytes
   uint32_t packets = 500;     // number
-  //uint32_t numPackets = 1;
   double interval = 0.1; // seconds
   Time interPacketInterval = Seconds(interval);         // double rss = -80;  // -dBm
   outFiles[0].open ("capture_combined.csv", std::ofstream::out | std::ofstream::trunc);
@@ -132,11 +118,6 @@ int main(int argc, char *argv[])
   CommandLine cmd;
   cmd.Parse(argc, argv);
 
-  // Convert to time object
-
-
-  // Enable verbosity for debug which includes
-  // NS_LOG_DEBUG_, NS_LOG_WARN and LOG_ERROR
   LogComponentEnable("WifiSimpleAdhoc", LOG_LEVEL_INFO);
 
   // Message to terminal console for debug
@@ -157,17 +138,6 @@ int main(int argc, char *argv[])
   NS_LOG_UNCOND("%INFO: Configuring PHY Loss model...");
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
-  // Ptr<HybridBuildingsPropagationLossModel> propagationLossModel = CreateObject<HybridBuildingsPropagationLossModel> ();
-  //EnvironmentType env = UrbanEnvironment;
- // CitySize city = LargeCity;
-  //propagationLossModel->SetAttribute ("Frequency", DoubleValue (m_freq));
-  //propagationLossModel->SetAttribute ("Environment", EnumValue (env));
-  //propagationLossModel->SetAttribute ("CitySize", EnumValue (city));
-  // cancel shadowing effect
-  //propagationLossModel->SetAttribute ("ShadowSigmaOutdoor", DoubleValue (0.0));
-  //propagationLossModel->SetAttribute ("ShadowSigmaIndoor", DoubleValue (0.0));
-  //propagationLossModel->SetAttribute ("ShadowSigmaExtWalls", DoubleValue (0.0));
-  //wifiChannel.SetPropagationDelay("ns3::LogDistancePropagationLossModel"); 
 
   // Connect PHY with the Channel
   NS_LOG_UNCOND("%INFO: Connecting PHY with Channel...");
@@ -176,8 +146,6 @@ int main(int argc, char *argv[])
   // Create WifiHelper to be able to setup the PHY
   WifiHelper wifi; // = WifiHelper::Default ();
   wifi.SetStandard(WIFI_STANDARD_80211b);
-  //wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager","DataMode","OfdmRate12Mbps","ControlMode","OfdmRate12Mbps");
-  // Later test: ns3::IdealWifiManager
   wifi.SetRemoteStationManager("ns3::ArfWifiManager");
   // Control the Rate via Remote Station Manager
 
@@ -203,7 +171,6 @@ int main(int argc, char *argv[])
     Ptr<WifiNetDevice> p = DynamicCast<WifiNetDevice>(devices.Get(i));
     p->SetAddress(Mac48Address::Allocate());
     devices.Get(i)->SetReceiveCallback(MakeCallback(&ReceivePacket));
-    // p->GetPhy()->TraceConnectWithoutContext ("MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
   }
 
   Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::WifiPhy/MonitorSnifferRx", MakeCallback(&ReceivePacketWithRss));
@@ -214,13 +181,8 @@ int main(int argc, char *argv[])
 
   Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(0), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
 
-  // enable packet capture tracing and xml
-   // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
- //  AnimationInterface anim("WifiSimpleAdhoc.xml");
-  //Config::Connect ("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/Phy/MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
-
   Simulator::Run();
   Simulator::Destroy();
 
   return 0;
-} //END of Main function
+}
