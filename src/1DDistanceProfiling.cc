@@ -1,20 +1,3 @@
-/* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-/*
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation;
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- *
- * Author: Francisco Eduardo Balart Sanchez <balart40@hotmail.com 
- */
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/mobility-module.h"
@@ -28,11 +11,8 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
-// include header we will use for the packets header & payload
-// DEfine logging component
+
 NS_LOG_COMPONENT_DEFINE("WifiSimpleAdhoc");
-
-
 using namespace ns3;
 double distance = 5; // m
 static const uint32_t numNodes = 6;
@@ -82,19 +62,6 @@ void ReceivePacketWithRss(std::string context, Ptr<const Packet> packet, uint16_
 
 bool ReceivePacket(Ptr<NetDevice> netdevice, Ptr<const Packet> packet, uint16_t protocol, const Address &sourceAddress)
 {
-  // Ptr<WifiNetDevice> wifinetdevice = DynamicCast<WifiNetDevice> (netdevice);
-  // uint32_t pktSize = 1000;
-  //NS_LOG_UNCOND ("%INFO: Received one packet! I am node "<<wifinetdevice->GetNode ()->GetId ()<<" my MAC is: "<<wifinetdevice->GetAddress());
-  // NS_LOG_UNCOND ("%INFO: Received a packet from MAC:" << sourceAddress);
-  //Ptr<NetDevice> devicesource = sourceAddress->GetObject<NetDevice>();
-  //Ptr<Mac48Address> sourceMacAddress = GetObject<sourceAddress>;
-  //Ptr<m_address> mAddressfromMacSrc = sourceMacAddress->GetObject<m_address>();
-  //NS_LOG_UNCOND ("%INFO: received a packet from Node ID:" <<mAddressfromMacSrc->GetObject<Node>()->GetId());
-  // *** PROTOCOL NUMBER IS MAPPED TO A SPECIFIC L3 PAYLOAD FORMAT SEE LINK BELOW
-  //http://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
-  //NS_LOG_UNCOND ("%INFO: sending packet response due to callback with protocol: " << protocol);
-  //double r =1.0+ ((double) rand() / (RAND_MAX));
-  //Simulator::Schedule (Seconds (r), &GenerateTraffic, wifinetdevice, pktSize,1, Seconds(r));
   return true;
 }
 void installMobility(NodeContainer &c)
@@ -157,18 +124,6 @@ int main(int argc, char *argv[])
   NS_LOG_UNCOND("%INFO: Configuring PHY Loss model...");
   wifiChannel.SetPropagationDelay ("ns3::ConstantSpeedPropagationDelayModel");
   wifiChannel.AddPropagationLoss ("ns3::FriisPropagationLossModel");
-  // Ptr<HybridBuildingsPropagationLossModel> propagationLossModel = CreateObject<HybridBuildingsPropagationLossModel> ();
-  //EnvironmentType env = UrbanEnvironment;
- // CitySize city = LargeCity;
-  //propagationLossModel->SetAttribute ("Frequency", DoubleValue (m_freq));
-  //propagationLossModel->SetAttribute ("Environment", EnumValue (env));
-  //propagationLossModel->SetAttribute ("CitySize", EnumValue (city));
-  // cancel shadowing effect
-  //propagationLossModel->SetAttribute ("ShadowSigmaOutdoor", DoubleValue (0.0));
-  //propagationLossModel->SetAttribute ("ShadowSigmaIndoor", DoubleValue (0.0));
-  //propagationLossModel->SetAttribute ("ShadowSigmaExtWalls", DoubleValue (0.0));
-  //wifiChannel.SetPropagationDelay("ns3::LogDistancePropagationLossModel"); 
-
   // Connect PHY with the Channel
   NS_LOG_UNCOND("%INFO: Connecting PHY with Channel...");
 
@@ -196,14 +151,14 @@ int main(int argc, char *argv[])
   installMobility(c);
 
   NS_LOG_UNCOND("%INFO: Assign Mac48Address Addresses.");
-  //devices->SetAddress(Mac48Address::Allocate ());
+
   uint32_t nDevices = devices.GetN();
   for (uint32_t i = 0; i < nDevices; ++i)
   {
     Ptr<WifiNetDevice> p = DynamicCast<WifiNetDevice>(devices.Get(i));
     p->SetAddress(Mac48Address::Allocate());
     devices.Get(i)->SetReceiveCallback(MakeCallback(&ReceivePacket));
-    // p->GetPhy()->TraceConnectWithoutContext ("MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
+
   }
 
   Config::Connect("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Phy/$ns3::WifiPhy/MonitorSnifferRx", MakeCallback(&ReceivePacketWithRss));
@@ -214,13 +169,8 @@ int main(int argc, char *argv[])
 
   Simulator::ScheduleWithContext(wifinetdeviceA->GetNode()->GetId(), Seconds(0), &GenerateTraffic, wifinetdeviceA, packetSize, packets, interPacketInterval);
 
-  // enable packet capture tracing and xml
-   // wifiPhy.EnablePcap("WifiSimpleAdhoc", devices);
- //  AnimationInterface anim("WifiSimpleAdhoc.xml");
-  //Config::Connect ("/NodeList/0/DeviceList/*/$ns3::WifiNetDevice/Phy/MonitorSnifferRx", MakeCallback (&ReceivePacketWithRss));
-
   Simulator::Run();
   Simulator::Destroy();
 
   return 0;
-} //END of Main function
+}
